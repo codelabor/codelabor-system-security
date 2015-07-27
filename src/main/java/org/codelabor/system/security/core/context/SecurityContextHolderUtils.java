@@ -16,21 +16,25 @@
  */
 package org.codelabor.system.security.core.context;
 
+import java.util.Collection;
+
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.Assert;
 
 /**
  * @author Shin Sang-Jae
- * 
+ *
  */
 public class SecurityContextHolderUtils {
 
 	/**
 	 * get username from Principal
-	 * 
+	 *
 	 * @return username
 	 */
 	public static String getUsername() {
@@ -48,8 +52,7 @@ public class SecurityContextHolderUtils {
 					} else if (principal != null) {
 						username = principal.toString();
 					}
-					LoggerFactory.getLogger(SecurityContextHolderUtils.class)
-							.debug("username: {}", username);
+					LoggerFactory.getLogger(SecurityContextHolderUtils.class).debug("username: {}", username);
 				}
 			}
 		}
@@ -61,6 +64,34 @@ public class SecurityContextHolderUtils {
 	 */
 	public SecurityContextHolderUtils() {
 
+	}
+
+	/**
+	 *
+	 * check current user has specific role
+	 *
+	 * @param roleName
+	 *            Role name
+	 * @return
+	 */
+	public static boolean hasRole(String roleName) {
+		Assert.notNull(roleName);
+		boolean hasRole = false;
+		SecurityContext context = SecurityContextHolder.getContext();
+		if (context != null) {
+			Authentication authentication = context.getAuthentication();
+			if (authentication != null) {
+				Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+				for (GrantedAuthority authority : authorities) {
+					if (roleName.equals(authority.getAuthority())) {
+						hasRole = true;
+						break;
+					}
+				}
+			}
+		}
+		LoggerFactory.getLogger(SecurityContextHolderUtils.class).debug("hasRole: {}", hasRole);
+		return hasRole;
 	}
 
 }
